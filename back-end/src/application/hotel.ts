@@ -93,7 +93,7 @@ export const createHotel = async (
       name: hotel.data.name,
       location: hotel.data.location,
       image: hotel.data.image,
-      price: (hotel.data.price),
+      price: parseInt(hotel.data.price),
       description: hotel.data.description,
     });
 
