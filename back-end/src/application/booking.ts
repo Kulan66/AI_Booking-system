@@ -27,6 +27,7 @@ export const createBooking = async (
       checkIn: booking.data.checkIn,
       checkOut: booking.data.checkOut,
       roomNumber: booking.data.roomNumber,
+      totalBill: booking.data.totalBill,
     });
 
     // Return the response

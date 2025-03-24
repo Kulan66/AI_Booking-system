@@ -10,28 +10,55 @@ import {
   Tv,
   Wifi,
 } from "lucide-react";
-
 import { useParams } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function HotelPage() {
   const { id } = useParams();
-  const { data: hotel, isLoading, isError, error } = useGetHotelByIdQuery(id);
-  const [createBooking, { isLoading: isCreateBookingLoading }
-  ] = useCreateBookingMutation();
+  const { data: hotel, isLoading, isError } = useGetHotelByIdQuery(id);
+  const [createBooking, { isLoading: isCreateBookingLoading }] = useCreateBookingMutation();
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [totalBill, setTotalBill] = useState(0);
+
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const diffTime = Math.abs(checkOutDate - checkInDate);
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) {
+        diffDays = 1; // Add one night price if check-in and check-out are the same day
+      }
+      setTotalBill(diffDays * hotel.price);
+    }
+  }, [checkIn, checkOut, hotel]);
 
   const handleBook = async () => {
+    if (!checkIn || !checkOut) {
+      toast.error("Please select both check-in and check-out dates.");
+      return;
+    }
+    const toastId = toast.loading("Creating booking...");
     try {
       await createBooking({
         hotelId: id,
-        checkIn: new Date(),
-        checkOut: new Date(),
-        roomNumber: 200
-      })
+        checkIn,
+        checkOut,
+        roomNumber: 200,
+        totalBill,
+      }).unwrap();
+      toast.success("Booking successful!");
     } catch (error) {
-      console.log(error);
+      toast.error("Booking failed, please try again.");
+    } finally {
+      toast.dismiss(toastId);
     }
-  }
+  };
+
+  const today = new Date().toISOString().split("T")[0];
 
   if (isLoading)
     return (
@@ -94,13 +121,12 @@ export default function HotelPage() {
             <img
               src={hotel.image}
               alt={hotel.name}
-              className="absolute object-cover rounded-lg"
+              className="absolute object-cover rounded-lg w-full h-full"
             />
           </div>
-          <div className="flex space-x-2">
-            <Badge variant="secondary">Rooftop View</Badge>
-            <Badge variant="secondary">French Cuisine</Badge>
-            <Badge variant="secondary">City Center</Badge>
+          <div className="text-left">
+            <p className="text-2xl font-semibold">Total: ${totalBill}</p>
+            <p className="text-xl text-muted-foreground">Per Night: ${hotel.price}</p>
           </div>
         </div>
         <div className="space-y-6">
@@ -149,11 +175,37 @@ export default function HotelPage() {
             </CardContent>
           </Card>
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-2xl font-bold">${hotel.price}</p>
-              <p className="text-sm text-muted-foreground">per night</p>
+            <div className="space-y-2 flex flex-col">
+              <label className="block text-sm font-medium text-gray-700">
+                Check-in
+              </label>
+              <input
+                type="date"
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                min={today}
+              />
+              <Button variant="outline" size="sm" onClick={() => document.querySelector('input[type="date"]').showPicker()}>
+                Choose Check-in Date
+              </Button>
+              <label className="block text-sm font-medium text-gray-700">
+                Check-out
+              </label>
+              <input
+                type="date"
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                min={checkIn || today}
+              />
+              <Button variant="outline" size="sm" onClick={() => document.querySelectorAll('input[type="date"]')[1].showPicker()}>
+                Choose Check-out Date
+              </Button>
             </div>
-            <Button size="lg" onClick={handleBook}>Book Now</Button>
+            <Button size="lg" onClick={handleBook} disabled={isCreateBookingLoading}>
+              {isCreateBookingLoading ? "Booking..." : "Book Now"}
+            </Button>
           </div>
         </div>
       </div>

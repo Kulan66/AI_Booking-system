@@ -3,6 +3,7 @@ import { useState } from "react";
 import HotelCard from "./HotelCard";
 import LocationTab from "./LocationTab";
 import { useSelector } from "react-redux";
+
 export default function HotelListings() {
   const searchValue = useSelector((state) => state.search.value);
 
