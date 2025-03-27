@@ -8,15 +8,24 @@ export const api = createApi({
     baseUrl: `${BACKEND_URL}/api/`,
     prepareHeaders: async (headers, { getState }) => {
       const token = await window?.Clerk?.session?.getToken();
-      console.log(token);
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
+      return headers;
     }
   }),
   endpoints: (builder) => ({
     getHotels: builder.query({
-      query: () => "hotels",
+      query: ({ location, sortOrder }) => {
+        let query = "hotels";
+        const params = [];
+        if (location) params.push(`location=${location}`);
+        if (sortOrder) params.push(`sortOrder=${sortOrder}`);
+        if (params.length > 0) {
+          query += `?${params.join("&")}`;
+        }
+        return query;
+      },
     }),
     getHotelsForSearchQuery: builder.query({
       query: ({ query }) => `hotels/search/retrieve?query=${query}`,
@@ -38,7 +47,6 @@ export const api = createApi({
         body: booking,
       }),
     }),
-    
   }),
 });
 

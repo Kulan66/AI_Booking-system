@@ -151,25 +151,25 @@ export default function HotelPage() {
             </span>
           </div>
           <p className="text-muted-foreground">{hotel.description}</p>
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="text-xl font-semibold mb-4">Amenities</h2>
-              <div className="grid grid-cols-2 gap-4">
+          <Card className="bg-white shadow-lg rounded-lg">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Amenities</h2>
+              <div className="grid grid-cols-2 gap-6">
                 <div className="flex items-center">
-                  <Wifi className="h-5 w-5 mr-2" />
-                  <span>Free Wi-Fi</span>
+                  <Wifi className="h-6 w-6 text-primary mr-3" />
+                  <span className="text-gray-700">Free Wi-Fi</span>
                 </div>
                 <div className="flex items-center">
-                  <Restaurant className="h-5 w-5 mr-2" />
-                  <span>Restaurant</span>
+                  <Restaurant className="h-6 w-6 text-primary mr-3" />
+                  <span className="text-gray-700">Restaurant</span>
                 </div>
                 <div className="flex items-center">
-                  <Tv className="h-5 w-5 mr-2" />
-                  <span>Flat-screen TV</span>
+                  <Tv className="h-6 w-6 text-primary mr-3" />
+                  <span className="text-gray-700">Flat-screen TV</span>
                 </div>
                 <div className="flex items-center">
-                  <Coffee className="h-5 w-5 mr-2" />
-                  <span>Coffee maker</span>
+                  <Coffee className="h-6 w-6 text-primary mr-3" />
+                  <span className="text-gray-700">Coffee maker</span>
                 </div>
               </div>
             </CardContent>

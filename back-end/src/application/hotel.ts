@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-
 import Hotel from "../infrastructure/schemas/Hotel";
 import NotFoundError from "../domain/errors/not-found-error";
 import ValidationError from "../domain/errors/validation-error";
 import { CreateHotelDTO } from "../domain/dtos/hotel";
-
 import OpenAI from "openai";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -15,7 +13,11 @@ export const getAllHotels = async (
   next: NextFunction
 ) => {
   try {
-    const hotels = await Hotel.find();
+    const { location, sortOrder } = req.query;
+    const filter = location ? { location: new RegExp(location as string, "i") } : {};
+    const sort = sortOrder === "asc" ? { price: 1 } : sortOrder === "desc" ? { price: -1 } : {};
+
+    const hotels = await Hotel.find(filter).sort(sort as any);
     res.status(200).json(hotels);
     return;
   } catch (error) {
@@ -56,11 +58,6 @@ export const generateResponse = async (
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: [
-      // {
-      //   role: "system",
-      //   content:
-      //     "You are assistant that will categorize the words that a user gives and give them labels and show an output. Return this response as in the following examples: user: Lake, Cat, Dog, Tree; response: [{label:Nature, words:['Lake', 'Tree']}, {label:Animals, words:['Cat', 'Dog']}] ",
-      // },
       { role: "user", content: prompt },
     ],
     store: true,
@@ -93,7 +90,7 @@ export const createHotel = async (
       name: hotel.data.name,
       location: hotel.data.location,
       image: hotel.data.image,
-      price: parseInt(hotel.data.price),
+      price: (hotel.data.price),
       description: hotel.data.description,
     });
 
